@@ -106,7 +106,7 @@ class World:
                 # 将这个新患者加入到感染者队列
                 self.INFECTED.append(people)
                 self.SUSCEPTIBLE.remove(people)
-        print("疫情爆发第", self.date + 1, "天， 日感染人数：", count)
+        print("疫情爆发第", str(self.date + 1), "天， 日感染人数：", str(count))
 
     def updateInfectorInfo(self):
         """
@@ -132,10 +132,8 @@ class World:
                         self.SUSCEPTIBLE.append(people)
                     self.INFECTED.remove(people)
                     self.bedQuantity += 1
-                    # print("患者痊愈")
                     continue
                 else:
-                    # print("患者仍在医院治疗,还需天数：", people.inRoom)
                     pass
 
             else:
@@ -144,13 +142,10 @@ class World:
                     if self.bedQuantity > 0:  # 住院成功
                         self.bedQuantity -= 1
                         people.InHospital = True
-                        # print("住院成功")
                     else:
                         people.hiddenDay = 1
-                        # print("未能成功住院")
 
             index = np.random.choice([1, 0], 1, p=[people.deathRate, 1 - people.deathRate])  # index 为0，表示不会死亡
-            # print(index, "\t", people.infectedRate)
 
             if index[0] == 1:
                 print("患者死亡...其死亡率此时为", people.deathRate, "年龄为", people.age, "是否死于医院：", people.InHospital)
@@ -175,7 +170,6 @@ class World:
                     for survival in self.SUSCEPTIBLE:  # 指数传播,每次感染有效距离内最多两个人
                         if DistanceCount(people.x, people.y, survival.x, survival.y) <= 10:
                             survival.state = "infected"
-                            # print("指数增长下感染了一人")
                             survival.hiddenDay = random.randrange(6, 12)
                             if people.age > 40:  # 致死率更新
                                 people.deathRate = float(0.001 * people.age)
@@ -216,10 +210,32 @@ class World:
                         if survival.roundPeople >= 1:
                             survival.roundPeople -= 1
 
+    def OneDay(self):
+        self.initialize_container()
+        fig = plt.figure(figsize=(10, 10))
+        self.Draw(False, fig)
+        self.date += 1
+        print("当前是疫情爆发的第", self.date, "天")
+        self.UpdateRemInfo()
+        print("治愈人数当前共有", len(self.REMOVED))
+        self.updateInfectorInfo()
+        print("当前患者总计人数", len(self.INFECTED))
+        self.UpdateSusInfo()
+        if self.medicine < 1:
+            self.medicine += 0.01
+        print("易感人群总计人数", len(self.SUSCEPTIBLE))
+        print("医院床位还有", self.bedQuantity)
+        print("当前死亡人数为", len(self.DEAD))
+        print("\n\n")
+        if len(self.INFECTED) <= 0 or len(self.SUSCEPTIBLE) <= 0:
+            print("sleep")
+            time.sleep(10)
+            self.Draw(False)
+
     def Happen(self):
         self.initialize_container()
         self.maxInfect = 2
-        fig = plt.figure(figsize=(100, 100))
+        fig = plt.figure(figsize=(10, 10))
         while len(self.INFECTED) > 0 and len(self.SUSCEPTIBLE) > 0:
             self.Draw(False, fig)
             self.date += 1
@@ -257,8 +273,8 @@ class World:
         left, bottom, width, height = 0.1, 0.1, 0.8, 0.8
 
         aGraphic = fig.add_axes([left, bottom, width, height])
-        day = "Days:" + str(self.date) + "  当前患者人数:" + str(len(self.INFECTED)) + "  当前死亡人数:" + str(
-            len(self.DEAD)) + "  尚未感染人数：" + str(len(self.SUSCEPTIBLE) + "当前治愈人数" + str(len(self.REMOVED)))
+        day = "Days:" + str(self.date + 1) + "  当前患者人数:" + str(len(self.INFECTED)) + "  当前死亡人数:" + str(
+            len(self.DEAD)) + "  尚未感染人数：" + str(len(self.SUSCEPTIBLE)) + "  治愈人数：" + str(len(self.REMOVED))
         aGraphic.set_title(day, fontproperties=myFont)
         npx1, npy1, npx2, npy2, npx3, npy3, npx4, npy4 = [], [], [], [], [], [], [], []
         for people in self.SUSCEPTIBLE:
@@ -276,8 +292,7 @@ class World:
         aGraphic.scatter(npx1, npy1, marker="o", color="blue", s=5, label="SUSCEPTIBLE")
         aGraphic.scatter(npx2, npy2, marker="o", color="red", s=5, label="INFECTED")
         aGraphic.scatter(npx3, npy3, marker="o", color="green", s=5, label="REMOVED")
-        aGraphic.scatter(npx4, npy4, marker="o", color="white", s=5, label="DEAD")
-        # ani = animation.FuncAnimation(aGraphic, )
+        aGraphic.scatter(npx4, npy4, marker="x", color="black", s=5, label="DEAD")
         aGraphic.legend(loc="best")
         if not choose:
             plt.pause(1)
