@@ -1,10 +1,15 @@
 import random
 from decimal import Decimal
 import time
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.font_manager import FontProperties
 from People import People
+
+
+def DistanceCount(x1, y1, x2, y2):
+    return math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 
 
 class World:
