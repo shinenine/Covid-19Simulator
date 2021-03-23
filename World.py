@@ -36,6 +36,12 @@ class World:
         self.quarantineRatio = quarantineRatio
         self.numberOfPeople = numberOfPeople
         self.fig = plt.figure(figsize=(10, 10))
+        self.sArray = []
+        self.iArray = []
+        self.rArray = []
+        self.dArray = []
+
+
 
     def initialize_container(self):
         """

@@ -16,7 +16,8 @@ def startSimulate():
         start.oneDay()
 
     def auto():
-        start.Happen()
+        while True:
+            start.oneDay()
 
     nextDay = tk.Button(window, text='nextDay', width=10, height=1, command=nextDay)
     nextDay.grid(row=6, column=0, padx=10, pady=10)
