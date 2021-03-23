@@ -9,11 +9,19 @@ def startSimulate():
     _quarantineRatio = float(quarantineRatio.get())
     _numberOfPeople = int(numberOfPeople.get())
     start = World(_bedQuantities, _deadRate, reinfected, _quarantineRatio, _numberOfPeople)  # 床位，杀伤力，治愈者是否带有抗体
-    start.Happen()
+    start.initialize_container()
+    start.oneDay()
 
+    def nextDay():
+        start.oneDay()
 
-def changeFlag():
-    flag = 1
+    def auto():
+        start.Happen()
+
+    nextDay = tk.Button(window, text='nextDay', width=10, height=1, command=nextDay)
+    nextDay.grid(row=6, column=0, padx=10, pady=10)
+    auto = tk.Button(window, text='auto', width=10, height=1, command=auto)
+    auto.grid(row=6, column=1, padx=10, pady=10)
 
 
 if __name__ == '__main__':
@@ -50,9 +58,5 @@ if __name__ == '__main__':
 
     b = tk.Button(window, text='start simulating', width=15, height=1, command=startSimulate)
     b.grid(row=5, column=1, padx=10, pady=10)
-
-    # flag = 0
-    # pause = tk.Button(window, text='pause', width=15, height=1, command=changeFlag)
-    # pause.grid(row=6, column=0, padx=10, pady=10)
 
     window.mainloop()

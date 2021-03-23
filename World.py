@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.font_manager import FontProperties
 from People import People
+from matplotlib.widgets import Button
 
 
 def DistanceCount(x1, y1, x2, y2):
@@ -34,6 +35,7 @@ class World:
         self.medicine = 0.02
         self.quarantineRatio = quarantineRatio
         self.numberOfPeople = numberOfPeople
+        self.fig = plt.figure(figsize=(10, 10))
 
     def initialize_container(self):
         """
@@ -210,10 +212,8 @@ class World:
                         if survival.roundPeople >= 1:
                             survival.roundPeople -= 1
 
-    def OneDay(self):
-        self.initialize_container()
-        fig = plt.figure(figsize=(10, 10))
-        self.Draw(False, fig)
+    def oneDay(self):
+        self.Draw(False, self.fig)
         self.date += 1
         print("当前是疫情爆发的第", self.date, "天")
         self.UpdateRemInfo()
@@ -233,11 +233,9 @@ class World:
             self.Draw(False)
 
     def Happen(self):
-        self.initialize_container()
         self.maxInfect = 2
-        fig = plt.figure(figsize=(10, 10))
         while len(self.INFECTED) > 0 and len(self.SUSCEPTIBLE) > 0:
-            self.Draw(False, fig)
+            self.Draw(False, self.fig)
             self.date += 1
             print("当前是疫情爆发的第", self.date, "天")
             self.UpdateRemInfo()
@@ -293,7 +291,7 @@ class World:
         aGraphic.scatter(npx2, npy2, marker="o", color="red", s=5, label="INFECTED")
         aGraphic.scatter(npx3, npy3, marker="o", color="green", s=5, label="REMOVED")
         aGraphic.scatter(npx4, npy4, marker="x", color="black", s=5, label="DEAD")
-        aGraphic.legend(loc="best")
+        aGraphic.legend(loc="lower right")
         if not choose:
             plt.pause(1)
             aGraphic.cla()
