@@ -2,6 +2,9 @@ from World import World
 import tkinter as tk
 from tkinter import ttk
 import matplotlib.pyplot as plt
+from threading import Timer
+import time
+import sched
 
 
 def startSimulate():
@@ -17,8 +20,9 @@ def startSimulate():
         start.oneDay(fig)
 
     def auto():
-        while True:
-            start.oneDay(fig)
+        # auto还有bug
+        schedule = sched.scheduler(time.time, time.sleep)
+        schedule.enter()
 
     nextDay = tk.Button(window, text='nextDay', width=10, height=1, command=nextDay)
     nextDay.grid(row=6, column=0, padx=10, pady=10)
