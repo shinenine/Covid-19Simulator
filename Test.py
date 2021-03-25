@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from World import World
 from threading import Thread
+import multiprocessing
 import matplotlib.pyplot as plt
 
 
@@ -17,27 +18,39 @@ def main():
     def nextDay():
         start.oneDay(fig)
 
-    class autoSimulating(Thread):
+    # class autoSimulating(Process):
+    #
+    #     def run(self):
+    #         while flag == 0:
+    #             start.oneDay(fig)
+    #             if len(start.INFECTED) <= 0 and len(start.SUSCEPTIBLE) <= 0:
+    #                 break
+    #             # print(flag)
+    #         autoButton.config(state=tk.NORMAL)
 
-        def run(self):
-            global flag
-            flag = 1
-
-    def autoSimulate():
-        autoButton.config(state=tk.DISABLED)
-        autoSimulating(daemon=False).start()
-
-    def pause():
+    def run():
         while flag == 0:
+            # lock.acquire()
             start.oneDay(fig)
             if len(start.INFECTED) <= 0 and len(start.SUSCEPTIBLE) <= 0:
                 break
+            # lock.release()
             # print(flag)
         autoButton.config(state=tk.NORMAL)
 
+    # def autoSimulate():
+    #     autoButton.config(state=tk.DISABLED)
+    #     lock = multiprocessing.Lock()
+    #     process = multiprocessing.Process(target=run, args=(lock, ))
+    #     process.start()
+
+    def pause():
+        global flag
+        flag = 1
+
     nextDay = tk.Button(window, text='nextDay', width=10, height=1, command=nextDay)
     nextDay.grid(row=6, column=0, padx=5, pady=10)
-    autoButton = tk.Button(window, text='auto', width=10, height=1, command=autoSimulate)
+    autoButton = tk.Button(window, text='auto', width=10, height=1, command=run)
     autoButton.grid(row=6, column=1, padx=5, pady=10)
     pauseButton = tk.Button(window, text='pause', width=10, height=1, command=pause)
     pauseButton.grid(row=6, column=2, padx=5, pady=10)

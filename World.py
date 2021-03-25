@@ -20,7 +20,7 @@ class World:
         medicine: 康复率
         date:疾病开始爆发后经历的总天数
         latency:潜伏期
-        NumofPeopleInfectedMeet患者每天见的人数
+        numOfPeopleInfectedMeet患者每天见的人数
         """
         # self.people_container = [] # 用于存放people
 
@@ -31,7 +31,7 @@ class World:
         self.recoveryRate = 0.23
         self.SUSCEPTIBLE, self.EXPOSED, self.INFECTED, self.REMOVED, self.DEAD = [], [], [], [], []  # 三种人群的数组
         self.date = 0
-        self.NumofPeopleInfectedMeet = 10
+        self.numOfPeopleInfectedMeet = 10
         self.infectedRate = 0.6
         self.reinfect = reinfected
         self.peopleInfectedRate = 0
@@ -170,18 +170,18 @@ class World:
         self.Draw(False, fig)
         self.date += 1
         self.peopleInfectedRate = 1 - pow(
-            1 - self.NumofPeopleInfectedMeet / (self.numberOfPeople - len(self.DEAD)) * self.infectedRate,
+            1 - self.numOfPeopleInfectedMeet / (self.numberOfPeople - len(self.DEAD)) * self.infectedRate,
             len(self.INFECTED) - self.peopleInHos)
         if self.date == 7:
             self.deadRate = 0.05373
         if self.date == 14:
             self.deadRate = 0.035373
-            self.NumofPeopleInfectedMeet = 8
+            self.numOfPeopleInfectedMeet = 8
         if self.date == 28:
-            self.NumofPeopleInfectedMeet = 1.5
+            self.numOfPeopleInfectedMeet = 1.5
             self.recoveryRate = 0.95
         if self.date == 42:
-            self.NumofPeopleInfectedMeet = 1
+            self.numOfPeopleInfectedMeet = 1
             self.deadRate = 0.0173
 
         print("当前是疫情爆发的第", self.date, "天")
@@ -195,10 +195,8 @@ class World:
         print("医院床位还有", self.bedQuantity)
         print("当前死亡人数为", len(self.DEAD))
         print("\n\n")
-        if len(self.INFECTED) <= 0 or len(self.SUSCEPTIBLE) <= 0:
-            print("sleep")
-            time.sleep(10)
-            self.Draw(False, fig)
+        if len(self.INFECTED) <= 0 and len(self.SUSCEPTIBLE) <= 0:
+            print("结束")
 
     def Happen(self):
         self.initialize_container()
@@ -208,18 +206,18 @@ class World:
             self.Draw(False, fig)
             self.date += 1
             self.peopleInfectedRate = 1 - pow(
-                1 - self.NumofPeopleInfectedMeet / (self.numberOfPeople - len(self.DEAD)) * self.infectedRate,
+                1 - self.numOfPeopleInfectedMeet / (self.numberOfPeople - len(self.DEAD)) * self.infectedRate,
                 len(self.INFECTED) - self.peopleInHos)
             if self.date == 7:
                 self.deadRate = 0.05373
             if self.date == 14:
                 self.deadRate = 0.035373
-                self.NumofPeopleInfectedMeet = 8
+                self.numOfPeopleInfectedMeet = 8
                 self.recoveryRate = 0.95
             if self.date == 28:
-                self.NumofPeopleInfectedMeet = 1.5
+                self.numOfPeopleInfectedMeet = 1.5
             if self.date == 42:
-                self.NumofPeopleInfectedMeet = 1
+                self.numOfPeopleInfectedMeet = 1
                 self.deadRate = 0.0173
 
             print("当前是疫情爆发的第", self.date, "天")
