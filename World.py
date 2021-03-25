@@ -35,6 +35,9 @@ class World:
         self.infectedRate = 0.6
         self.reinfect = reinfected
         self.peopleInfectedRate = 0
+        self.susceptibleHistory, self.exposedHistory, self.infectedHistory, self.removedHistory, self.deadHistory =\
+            [], [], [], [], []
+        self.bedsHistory = []
 
     def initialize_container(self):
         """
@@ -184,72 +187,79 @@ class World:
             self.numOfPeopleInfectedMeet = 1
             self.deadRate = 0.0173
 
-        print("当前是疫情爆发的第", self.date, "天")
+        print("当前是疫情爆发的第", self.date + 1, "天")
         self.UpdateRemInfo()
         print("治愈人数当前共有", len(self.REMOVED))
+        self.removedHistory.append(len(self.REMOVED))
         self.updateInfectorInfo()
         print("当前患者总计人数", len(self.INFECTED))
+        self.infectedHistory.append(len(self.INFECTED))
         self.UpdateExpInpo()
         self.UpdateSusInfo()
         print("易感人群总计人数", len(self.SUSCEPTIBLE))
+        self.susceptibleHistory.append(len(self.SUSCEPTIBLE))
         print("医院床位还有", self.bedQuantity)
+        self.bedsHistory.append(self.bedQuantity)
         print("当前死亡人数为", len(self.DEAD))
+        self.deadHistory.append(len(self.DEAD))
+        self.exposedHistory.append(len(self.EXPOSED))
         print("\n\n")
         if len(self.INFECTED) <= 0 and len(self.SUSCEPTIBLE) <= 0:
             print("结束")
 
-    def Happen(self):
-        self.initialize_container()
-        self.maxInfect = 2
-        fig = plt.figure(figsize=(50, 50))
-        while len(self.INFECTED) > 0 and len(self.SUSCEPTIBLE) > 0:
-            self.Draw(False, fig)
-            self.date += 1
-            self.peopleInfectedRate = 1 - pow(
-                1 - self.numOfPeopleInfectedMeet / (self.numberOfPeople - len(self.DEAD)) * self.infectedRate,
-                len(self.INFECTED) - self.peopleInHos)
-            if self.date == 7:
-                self.deadRate = 0.05373
-            if self.date == 14:
-                self.deadRate = 0.035373
-                self.numOfPeopleInfectedMeet = 8
-                self.recoveryRate = 0.95
-            if self.date == 28:
-                self.numOfPeopleInfectedMeet = 1.5
-            if self.date == 42:
-                self.numOfPeopleInfectedMeet = 1
-                self.deadRate = 0.0173
-
-            print("当前是疫情爆发的第", self.date, "天")
-            self.UpdateRemInfo()
-            print("治愈人数当前共有", len(self.REMOVED))
-            self.updateInfectorInfo()
-            print("当前患者总计人数", len(self.INFECTED))
-            self.UpdateExpInpo()
-            self.UpdateSusInfo()
-            print("易感人群总计人数", len(self.SUSCEPTIBLE))
-            print("医院床位还有", self.bedQuantity)
-            print("当前死亡人数为", len(self.DEAD))
-            print("\n\n")
-            if len(self.INFECTED) <= 0 or len(self.SUSCEPTIBLE) <= 0:
-                print("sleep")
-                time.sleep(10)
-                self.Draw(False, fig)
-            if len(self.INFECTED) > self.maxInfect:
-                self.maxInfect = len(self.INFECTED)
-
-        if len(self.DEAD) >= 6002 or len(self.SUSCEPTIBLE) <= 0:
-            print("最终所有人都没能逃脱感染和死亡，您的错误决策毁灭了这个世界")
-            plt.title("最终所有人都没能逃脱感染和死亡，您的错误决策毁灭了这个世界")
-            plt.show()
-
-        else:
-            print("最终挽回了一切，健康人群还有：", len(self.SUSCEPTIBLE), "死亡人数总计为：", len(self.DEAD), "\t感染总人数当前达到：",
-                  len(self.DEAD + self.REMOVED))
+    # def Happen(self):
+    #     self.initialize_container()
+    #     self.maxInfect = 2
+    #     fig = plt.figure(figsize=(50, 50))
+    #     while len(self.INFECTED) > 0 and len(self.SUSCEPTIBLE) > 0:
+    #         self.Draw(False, fig)
+    #         self.date += 1
+    #         self.peopleInfectedRate = 1 - pow(
+    #             1 - self.numOfPeopleInfectedMeet / (self.numberOfPeople - len(self.DEAD)) * self.infectedRate,
+    #             len(self.INFECTED) - self.peopleInHos)
+    #         if self.date == 7:
+    #             self.deadRate = 0.05373
+    #         if self.date == 14:
+    #             self.deadRate = 0.035373
+    #             self.numOfPeopleInfectedMeet = 8
+    #             self.recoveryRate = 0.95
+    #         if self.date == 28:
+    #             self.numOfPeopleInfectedMeet = 1.5
+    #         if self.date == 42:
+    #             self.numOfPeopleInfectedMeet = 1
+    #             self.deadRate = 0.0173
+    #
+    #         print("当前是疫情爆发的第", self.date, "天")
+    #         self.UpdateRemInfo()
+    #         print("治愈人数当前共有", len(self.REMOVED))
+    #         self.updateInfectorInfo()
+    #         print("当前患者总计人数", len(self.INFECTED))
+    #         self.UpdateExpInpo()
+    #         self.UpdateSusInfo()
+    #         print("易感人群总计人数", len(self.SUSCEPTIBLE))
+    #         print("医院床位还有", self.bedQuantity)
+    #         print("当前死亡人数为", len(self.DEAD))
+    #         print("\n\n")
+    #         if len(self.INFECTED) <= 0 or len(self.SUSCEPTIBLE) <= 0:
+    #             print("sleep")
+    #             time.sleep(10)
+    #             self.Draw(False, fig)
+    #         if len(self.INFECTED) > self.maxInfect:
+    #             self.maxInfect = len(self.INFECTED)
+    #
+    #     if len(self.DEAD) >= 6002 or len(self.SUSCEPTIBLE) <= 0:
+    #         print("最终所有人都没能逃脱感染和死亡，您的错误决策毁灭了这个世界")
+    #         plt.title("最终所有人都没能逃脱感染和死亡，您的错误决策毁灭了这个世界")
+    #         plt.show()
+    #
+    #     else:
+    #         print("最终挽回了一切，健康人群还有：", len(self.SUSCEPTIBLE), "死亡人数总计为：", len(self.DEAD), "\t感染总人数当前达到：",
+    #               len(self.DEAD + self.REMOVED))
 
     def Draw(self, choose, fig):
         myFont = FontProperties(fname='HYShangWeiShouShuW.ttf', size=12)
         plt.rcParams['axes.unicode_minus'] = False
+        plt.ioff()
         left, bottom, width, height = 0.1, 0.1, 0.8, 0.8
 
         aGraphic = fig.add_axes([left, bottom, width, height])
