@@ -3,6 +3,8 @@ from tkinter import ttk
 from World import World
 from threading import Thread
 import multiprocessing
+import pynput
+import keyboard
 import matplotlib.pyplot as plt
 
 
@@ -18,6 +20,11 @@ def main():
     def nextDay():
         start.oneDay(fig)
 
+    """
+    使用多线程 matplotlib只能在主线程中绘图 
+    使用多进程 多进程无法共享内存
+    """
+
     # class autoSimulating(Process):
     #
     #     def run(self):
@@ -29,9 +36,12 @@ def main():
     #         autoButton.config(state=tk.NORMAL)
 
     def run():
+        global flag
+        flag = 0
         while flag == 0:
             # lock.acquire()
             start.oneDay(fig)
+            keyboard.hook(pause)
             if len(start.INFECTED) <= 0 and len(start.SUSCEPTIBLE) <= 0:
                 break
             # lock.release()
@@ -44,16 +54,14 @@ def main():
     #     process = multiprocessing.Process(target=run, args=(lock, ))
     #     process.start()
 
-    def pause():
+    def pause(x):
         global flag
         flag = 1
 
     nextDay = tk.Button(window, text='nextDay', width=10, height=1, command=nextDay)
-    nextDay.grid(row=6, column=0, padx=5, pady=10)
+    nextDay.grid(row=6, column=0, padx=8, pady=10)
     autoButton = tk.Button(window, text='auto', width=10, height=1, command=run)
-    autoButton.grid(row=6, column=1, padx=5, pady=10)
-    pauseButton = tk.Button(window, text='pause', width=10, height=1, command=pause)
-    pauseButton.grid(row=6, column=2, padx=5, pady=10)
+    autoButton.grid(row=6, column=1, padx=8, pady=10)
 
 
 if __name__ == '__main__':
