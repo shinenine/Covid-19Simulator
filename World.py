@@ -9,10 +9,9 @@ from People import People
 from matplotlib.widgets import Button
 
 
-
 class World:
 
-    def __init__(self, bedQuantity, deadRate, reinfected, quarantineRatio, numberOfPeople):
+    def __init__(self, bedQuantity, deadRate, reinfected, numberOfPeople):
         """
         坐标系大小 100 x 100
         people_container: 存放people的列表
@@ -21,7 +20,6 @@ class World:
         infectedRate: 感染率
         medicine: 康复率
         date:疾病开始爆发后经历的总天数
-        quarantineRation:有自我隔离意识的人群比率
         latency:潜伏期
         NumofPeopleInfectedMeet患者每天见的人数
         """
@@ -30,9 +28,9 @@ class World:
         self.numberOfPeople = numberOfPeople
         self.bedQuantity = bedQuantity
         self.peopleInHos = 0
-        self.deadRate = 0.065373
+        self.deadRate = deadRate # 0.065373
         self.recoveryRate = 0.23
-        self.SUSCEPTIBLE, self.EXPOSED, self.INFECTED, self.REMOVED, self.DEAD = [], [], [], [], [] # 三种人群的数组
+        self.SUSCEPTIBLE, self.EXPOSED, self.INFECTED, self.REMOVED, self.DEAD = [], [], [], [], []  # 三种人群的数组
         self.date = 0
         self.NumofPeopleInfectedMeet = 10
         self.infectedRate = 0.6
@@ -41,7 +39,7 @@ class World:
 
     def initialize_container(self):
         """
-        产生10000000个人, 坐标是随机
+        产生6000个人, 坐标是随机
         """
         for i in range(int(self.numberOfPeople)):
             x = Decimal(random.uniform(0, 100)).quantize(Decimal("0.0"))
@@ -49,7 +47,7 @@ class World:
             new_people = People(x, y, True)
             self.SUSCEPTIBLE.append(new_people)
 
-        for i in range(2):  # 产生40个零号病人
+        for i in range(2):  # 产生2个零号病人
             x = Decimal(random.uniform(0, 100)).quantize(Decimal("0.0"))
             y = Decimal(random.uniform(0, 100)).quantize(Decimal("0.0"))
             new_people = People(x, y, False)
@@ -60,7 +58,7 @@ class World:
         更新易感人群的基本信息，判断该人是否会成为潜伏者
         """
         count = 0
-        
+
         for people in self.SUSCEPTIBLE:  # 遍历所有的健康易感人群
             """
             修改易感人群的感染率
@@ -68,19 +66,20 @@ class World:
             """
             if people.token:
                 pass
-                #people.infectedRate = 0.06 * (1 - self.medicine)
+                # people.infectedRate = 0.06 * (1 - self.medicine)
             else:
                 deltaX = random.randint(-1, 1)
                 deltaY = random.randint(-1, 1)
                 people.x += deltaX
                 people.y += deltaY
-            
-            index = np.random.choice([1, 0], 1, p=[self.peopleInfectedRate, 1 - self.peopleInfectedRate])  # index 为0，表示不会感染
+
+            index = np.random.choice([1, 0], 1,
+                                     p=[self.peopleInfectedRate, 1 - self.peopleInfectedRate])  # index 为0，表示不会感染
             if index[0] == 1:
                 people.state = 'exposed'
                 count += 1
-                #print("正常人被感染")
-                
+                # print("正常人被感染")
+
                 people.isCount = True
                 # 将这个新患者加入到潜伏者队列
                 self.EXPOSED.append(people)
@@ -138,7 +137,7 @@ class World:
                     self.peopleInHos += 1
                     people.InHospital = True
                     # print("住院成功")
-            
+
             index = np.random.choice([1, 0], 1, p=[self.deadRate, 1 - self.deadRate])  # index 为0，表示不会死亡
             # print(index, "\t", people.infectedRate)
 
@@ -168,11 +167,12 @@ class World:
             if people.isCount:
                 people.isCount = False
 
-    def oneDay(self):
-        fig = plt.figure(figsize=(50, 50))
+    def oneDay(self, fig):
         self.Draw(False, fig)
         self.date += 1
-        self.peopleInfectedRate = 1 - pow(1 - self.NumofPeopleInfectedMeet / (self.numberOfPeople-len(self.DEAD)) * self.infectedRate, len(self.INFECTED) - self.peopleInHos)
+        self.peopleInfectedRate = 1 - pow(
+            1 - self.NumofPeopleInfectedMeet / (self.numberOfPeople - len(self.DEAD)) * self.infectedRate,
+            len(self.INFECTED) - self.peopleInHos)
         if self.date == 7:
             self.deadRate = 0.05373
         if self.date == 14:
@@ -208,7 +208,9 @@ class World:
         while len(self.INFECTED) > 0 and len(self.SUSCEPTIBLE) > 0:
             self.Draw(False, fig)
             self.date += 1
-            self.peopleInfectedRate = 1 - pow(1 - self.NumofPeopleInfectedMeet / (self.numberOfPeople-len(self.DEAD)) * self.infectedRate, len(self.INFECTED) - self.peopleInHos)
+            self.peopleInfectedRate = 1 - pow(
+                1 - self.NumofPeopleInfectedMeet / (self.numberOfPeople - len(self.DEAD)) * self.infectedRate,
+                len(self.INFECTED) - self.peopleInHos)
             if self.date == 7:
                 self.deadRate = 0.05373
             if self.date == 14:
@@ -249,13 +251,15 @@ class World:
                   len(self.DEAD + self.REMOVED))
 
     def Draw(self, choose, fig):
-        # myFont = FontProperties(fname='HYShangWeiShouShuW.ttf', size=15)
+        myFont = FontProperties(fname='HYShangWeiShouShuW.ttf', size=12)
         plt.rcParams['axes.unicode_minus'] = False
         left, bottom, width, height = 0.1, 0.1, 0.8, 0.8
 
         aGraphic = fig.add_axes([left, bottom, width, height])
-        day = "Days:" + str(self.date) + "  S尚未感染人数：" + str(len(self.SUSCEPTIBLE)) + "E潜伏者人数:" + str(len(self.EXPOSED)) + "I当前患者人数:" + str(len(self.INFECTED)) +"R当前治愈人数" + str(len(self.REMOVED)) + "  D当前死亡人数:" + str(len(self.DEAD))
-        aGraphic.set_title(day)  # , fontproperties=myFont)
+        day = "Days:" + str(self.date) + "  S尚未感染人数：" + str(len(self.SUSCEPTIBLE)) + "  E潜伏者人数:" + str(
+            len(self.EXPOSED)) + "  I当前患者人数:" + str(len(self.INFECTED)) + "  R当前治愈人数" + str(
+            len(self.REMOVED)) + "  D当前死亡人数:" + str(len(self.DEAD))
+        aGraphic.set_title(day, fontproperties=myFont)
         npx1, npy1, npx2, npy2, npx3, npy3, npx4, npy4, npx5, npy5 = [], [], [], [], [], [], [], [], [], []
         for people in self.SUSCEPTIBLE:
             npx1.append(people.x)
@@ -276,13 +280,11 @@ class World:
         aGraphic.scatter(npx5, npy5, marker="o", color="yellow", s=5, label="EXPOSED")
         aGraphic.scatter(npx2, npy2, marker="o", color="red", s=5, label="INFECTED")
         aGraphic.scatter(npx3, npy3, marker="o", color="green", s=5, label="REMOVED")
-        aGraphic.scatter(npx4, npy4, marker="o", color="white", s=5, label="DEAD")
+        aGraphic.scatter(npx4, npy4, marker="x", color="black", s=5, label="DEAD")
         # ani = animation.FuncAnimation(aGraphic, )
         aGraphic.legend(loc="best")
         if not choose:
-            plt.pause(0.1)
+            plt.pause(0.5)
             aGraphic.cla()
         # else:
         #     plt.show()
-
-         
