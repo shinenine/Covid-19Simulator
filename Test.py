@@ -11,8 +11,10 @@ def main():
     b['state'] = tk.DISABLED
     _bedQuantities = int(bedQuantities.get())
     _deadRate = float(deadRate.get())
+    _reinfected = float(reinfected.get())
     _numberOfPeople = int(numberOfPeople.get())
-    start = World(_bedQuantities, _deadRate, reinfected, _numberOfPeople)  # 床位，杀伤力，治愈者是否带有抗体
+    start = World(_bedQuantities, _deadRate, _reinfected, _numberOfPeople, hospitalLevel, quarantineRatio)
+    # 床位，杀伤力，治愈者是否带有抗体,总人数，医院治疗能力，隔离等级
     start.initialize_container()
     fig = plt.figure(figsize=(10, 10))
     start.oneDay(fig)
@@ -32,7 +34,8 @@ def main():
         while flag == 0:
             start.oneDay(fig)
             keyboard.hook(pause)
-            if len(start.INFECTED) <= 0 and len(start.SUSCEPTIBLE) <= 0:
+            if (len(start.INFECTED) <= 0 and len(start.EXPOSED) <= 0) \
+                    or (len(start.REMOVED) <= 0 and len(start.SUSCEPTIBLE) <= 0):
                 break
         autoButton.config(state=tk.NORMAL)
 
@@ -41,21 +44,18 @@ def main():
         flag = 1
 
     nextDay = tk.Button(window, text='nextDay', width=10, height=1, command=nextDay)
-    nextDay.grid(row=6, column=0, padx=8, pady=10)
+    nextDay.grid(row=13, column=0, padx=8, pady=10)
     autoButton = tk.Button(window, text='auto', width=10, height=1, command=run)
-    autoButton.grid(row=6, column=1, padx=8, pady=10)
+    autoButton.grid(row=13, column=1, padx=8, pady=10)
 
     def showSus():
         plt.figure()
         plt.ion()
         myFont = FontProperties(fname='HYShangWeiShouShuW.ttf', size=12)
+        plt.title('易感者数量折线图', fontproperties=myFont)
         plt.plot(start.susceptibleHistory, marker='o', color="blue")
         plt.xlim(0, None)
         plt.ylim(0, 6000)
-        majorLocator = MultipleLocator(1)
-        ax = plt.gca()
-        # 把x,y轴的主刻度设置为1的倍数
-        ax.xaxis.set_major_locator(majorLocator)
         plt.ylabel("易感者数量", fontproperties=myFont)
         plt.xlabel("天数", fontproperties=myFont)
         plt.show()
@@ -64,13 +64,10 @@ def main():
         plt.figure()
         plt.ion()
         myFont = FontProperties(fname='HYShangWeiShouShuW.ttf', size=12)
+        plt.title('潜伏者数量折线图', fontproperties=myFont)
         plt.plot(start.exposedHistory, marker='o', color="blue")
         plt.xlim(0, None)
         plt.ylim(0, None)
-        majorLocator = MultipleLocator(1)
-        ax = plt.gca()
-        # 把x,y轴的主刻度设置为1的倍数
-        ax.xaxis.set_major_locator(majorLocator)
         plt.ylabel("潜伏着数量", fontproperties=myFont)
         plt.xlabel("天数", fontproperties=myFont)
         plt.show()
@@ -79,13 +76,10 @@ def main():
         plt.figure()
         plt.ion()
         myFont = FontProperties(fname='HYShangWeiShouShuW.ttf', size=12)
+        plt.title('感染者数量折线图', fontproperties=myFont)
         plt.plot(start.infectedHistory, marker='o', color="blue")
         plt.xlim(0, None)
         plt.ylim(0, None)
-        majorLocator = MultipleLocator(1)
-        ax = plt.gca()
-        # 把x,y轴的主刻度设置为1的倍数
-        ax.xaxis.set_major_locator(majorLocator)
         plt.ylabel("感染者数量", fontproperties=myFont)
         plt.xlabel("天数", fontproperties=myFont)
         plt.show()
@@ -94,13 +88,10 @@ def main():
         plt.figure()
         plt.ion()
         myFont = FontProperties(fname='HYShangWeiShouShuW.ttf', size=12)
+        plt.title('治愈者数量折线图', fontproperties=myFont)
         plt.plot(start.removedHistory, marker='o', color="blue")
         plt.xlim(0, None)
         plt.ylim(0, None)
-        majorLocator = MultipleLocator(1)
-        ax = plt.gca()
-        # 把x,y轴的主刻度设置为1的倍数
-        ax.xaxis.set_major_locator(majorLocator)
         plt.ylabel("治愈者数量", fontproperties=myFont)
         plt.xlabel("天数", fontproperties=myFont)
         plt.show()
@@ -109,6 +100,7 @@ def main():
         plt.figure()
         plt.ion()
         myFont = FontProperties(fname='HYShangWeiShouShuW.ttf', size=12)
+        plt.title('死亡者数量折线图', fontproperties=myFont)
         plt.plot(start.deadHistory, marker='o', color="blue")
         plt.xlim(0, None)
         plt.ylim(0, None)
@@ -124,29 +116,26 @@ def main():
         plt.figure()
         plt.ion()
         myFont = FontProperties(fname='HYShangWeiShouShuW.ttf', size=12)
+        plt.title('床位剩余数量折线图', fontproperties=myFont)
         plt.plot(start.bedsHistory, marker='o', color="blue")
         plt.xlim(0, None)
         plt.ylim(0, None)
-        majorLocator = MultipleLocator(1)
-        ax = plt.gca()
-        # 把x,y轴的主刻度设置为1的倍数
-        ax.xaxis.set_major_locator(majorLocator)
         plt.ylabel("床位剩余数量", fontproperties=myFont)
         plt.xlabel("天数", fontproperties=myFont)
         plt.show()
 
     sus = tk.Button(window, text='易感者', width=10, height=1, command=showSus)
-    sus.grid(row=7, column=0, padx=5, pady=10)
+    sus.grid(row=14, column=0, padx=5, pady=10)
     exposed = tk.Button(window, text='潜伏者', width=10, height=1, command=showExp)
-    exposed.grid(row=7, column=1, padx=5, pady=10)
+    exposed.grid(row=14, column=1, padx=5, pady=10)
     infect = tk.Button(window, text='感染者', width=10, height=1, command=showInfected)
-    infect.grid(row=8, column=0, padx=5, pady=10)
+    infect.grid(row=15, column=0, padx=5, pady=10)
     removed = tk.Button(window, text='治愈者', width=10, height=1, command=showRemoved)
-    removed.grid(row=8, column=1, padx=5, pady=10)
+    removed.grid(row=15, column=1, padx=5, pady=10)
     death = tk.Button(window, text='死亡者', width=10, height=1, command=showDead)
-    death.grid(row=9, column=0, padx=5, pady=10)
+    death.grid(row=16, column=0, padx=5, pady=10)
     beds = tk.Button(window, text='医院床位剩余', width=10, height=1, command=showBeds)
-    beds.grid(row=9, column=1, padx=5, pady=10)
+    beds.grid(row=16, column=1, padx=5, pady=10)
 
 
 if __name__ == '__main__':
@@ -165,24 +154,31 @@ if __name__ == '__main__':
     deadRate.grid(row=1, column=1, padx=10, pady=10)
     deadRate.insert(0, "0.001")
 
-    tk.Label(window, text='治愈者是否有抗体').grid(row=2)
-    reinfected = tk.BooleanVar
-    choice = ttk.Combobox(window, width=28, textvariable=reinfected)
-    choice['values'] = (True, False)
-    choice.grid(row=2, column=1, padx=10, pady=10)
-    choice.current(0)
-    #
-    # tk.Label(window, text='患者具有自我隔离意识的初始比例').grid(row=3)
-    # quarantineRatio = tk.Entry(window, width=30)
-    # quarantineRatio.grid(row=3, column=1, padx=10, pady=10)
-    # quarantineRatio.insert(0, "0.33")
+    tk.Label(window, text='治愈者获得抗体的比率').grid(row=2)
+    reinfected = tk.Entry(window, width=30)
+    reinfected.grid(row=2, column=1, padx=10, pady=10)
+    reinfected.insert(0, "0.5")
 
-    tk.Label(window, text='模拟的总人数').grid(row=3)
+    tk.Label(window, text='医院治疗水平').grid(row=3)
+    hospitalLevel = tk.StringVar
+    choice = ttk.Combobox(window, width=28, textvariable=hospitalLevel)
+    choice['values'] = ('High', 'Middle', 'Low')
+    choice.grid(row=3, column=1, padx=10, pady=10)
+    choice.current(0)
+
+    tk.Label(window, text='人群隔离意识').grid(row=11)
+    quarantineRatio = tk.StringVar
+    choice = ttk.Combobox(window, width=28, textvariable=hospitalLevel)
+    choice['values'] = ('High', 'Middle', 'Low')
+    choice.grid(row=11, column=1, padx=10, pady=10)
+    choice.current(0)
+
+    tk.Label(window, text='模拟的总人数').grid(row=10)
     numberOfPeople = tk.Entry(window, width=30)
-    numberOfPeople.grid(row=3, column=1, padx=10, pady=10)
+    numberOfPeople.grid(row=10, column=1, padx=10, pady=10)
     numberOfPeople.insert(0, "6000")
 
     b = tk.Button(window, text='start simulating', width=15, height=1, command=main)
-    b.grid(row=4, column=1, padx=10, pady=10)
+    b.grid(row=12, column=1, padx=10, pady=10)
 
     window.mainloop()

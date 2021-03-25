@@ -13,7 +13,7 @@ class People:
         self.state = "susceptible"
         self.immune = False
         self.InHospital = False
-        self.rateEtoI = 0.125
+        self.rateEtoI = 0.125  # 潜伏期的倒数
         self.isCount = True
         self.token = token
         # Susceptible, Infected, Removed, dead

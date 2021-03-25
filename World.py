@@ -1,7 +1,5 @@
 import random
 from decimal import Decimal
-import time
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.font_manager import FontProperties
@@ -10,7 +8,7 @@ from People import People
 
 class World:
 
-    def __init__(self, bedQuantity, deadRate, reinfected, numberOfPeople):
+    def __init__(self, bedQuantity, deadRate, reinfected, numberOfPeople, hospitalLevel, quarantineRatio):
         """
         坐标系大小 100 x 100
         people_container: 存放people的列表
@@ -26,16 +24,28 @@ class World:
 
         self.numberOfPeople = numberOfPeople
         self.bedQuantity = bedQuantity
+        self.initBedQuantity = bedQuantity
+        self.currentBedQuantity = bedQuantity
         self.peopleInHos = 0
-        self.deadRate = deadRate # 0.065373
-        self.recoveryRate = 0.23
+        self.deadRate = deadRate  # 0.065373
+        if hospitalLevel == 'High':
+            self.recoveryRate = 0.33
+        elif hospitalLevel == 'Middle':
+            self.recoveryRate = 0.23
+        else:
+            self.recoveryRate = 0.18
         self.SUSCEPTIBLE, self.EXPOSED, self.INFECTED, self.REMOVED, self.DEAD = [], [], [], [], []  # 三种人群的数组
         self.date = 0
-        self.numOfPeopleInfectedMeet = 10
+        if quarantineRatio == 'High':
+            self.numOfPeopleInfectedMeet = 10
+        elif quarantineRatio == 'Middle':
+            self.numOfPeopleInfectedMeet = 12
+        else:
+            self.numOfPeopleInfectedMeet = 14
         self.infectedRate = 0.6
         self.reinfect = reinfected
         self.peopleInfectedRate = 0
-        self.susceptibleHistory, self.exposedHistory, self.infectedHistory, self.removedHistory, self.deadHistory =\
+        self.susceptibleHistory, self.exposedHistory, self.infectedHistory, self.removedHistory, self.deadHistory = \
             [], [], [], [], []
         self.bedsHistory = []
 
@@ -46,13 +56,13 @@ class World:
         for i in range(int(self.numberOfPeople)):
             x = Decimal(random.uniform(0, 100)).quantize(Decimal("0.0"))
             y = Decimal(random.uniform(0, 100)).quantize(Decimal("0.0"))
-            new_people = People(x, y, True)
+            new_people = People(x, y, False)
             self.SUSCEPTIBLE.append(new_people)
 
         for i in range(2):  # 产生2个零号病人
             x = Decimal(random.uniform(0, 100)).quantize(Decimal("0.0"))
             y = Decimal(random.uniform(0, 100)).quantize(Decimal("0.0"))
-            new_people = People(x, y, False)
+            new_people = People(x, y, True)
             self.INFECTED.append(new_people)
 
     def UpdateSusInfo(self):
@@ -124,7 +134,8 @@ class World:
                 if recoChoice[0]:
                     people.isCount = True
                     people.state = "recovered"
-                    if self.reinfect:
+                    index = np.random.choice([1, 0], 1, p=[self.reinfect, 1 - self.reinfect])
+                    if index[0] == 1:
                         self.REMOVED.append(people)
                     else:
                         self.SUSCEPTIBLE.append(people)
@@ -161,10 +172,10 @@ class World:
         更新免疫者和死亡人数的信息，即更新其周围人的感染者人数
         """
         for people in self.REMOVED:
+
             if people.isCount:
                 people.isCount = False
                 people.immune = True
-
         for people in self.DEAD:
             if people.isCount:
                 people.isCount = False
@@ -175,11 +186,15 @@ class World:
         self.peopleInfectedRate = 1 - pow(
             1 - self.numOfPeopleInfectedMeet / (self.numberOfPeople - len(self.DEAD)) * self.infectedRate,
             len(self.INFECTED) - self.peopleInHos)
+        if len(self.INFECTED) > 2 * self.initBedQuantity and self.currentBedQuantity < 5 * self.initBedQuantity:
+            self.bedQuantity += 0.5 * self.initBedQuantity
+            self.currentBedQuantity += 0.5 * self.initBedQuantity
         if self.date == 7:
             self.deadRate = 0.05373
         if self.date == 14:
             self.deadRate = 0.035373
-            self.numOfPeopleInfectedMeet = 8
+            self.numOfPeopleInfectedMeet /= 2
+            self.recoveryRate *= 2
         if self.date == 28:
             self.numOfPeopleInfectedMeet = 1.5
             self.recoveryRate = 0.95
@@ -204,7 +219,8 @@ class World:
         self.deadHistory.append(len(self.DEAD))
         self.exposedHistory.append(len(self.EXPOSED))
         print("\n\n")
-        if len(self.INFECTED) <= 0 and len(self.SUSCEPTIBLE) <= 0:
+        if (len(self.INFECTED) <= 0 and len(self.EXPOSED) <= 0) \
+                or (len(self.REMOVED) <= 0 and len(self.SUSCEPTIBLE) <= 0):
             print("结束")
 
     # def Happen(self):
@@ -291,7 +307,7 @@ class World:
         # ani = animation.FuncAnimation(aGraphic, )
         aGraphic.legend(loc="best")
         if not choose:
-            plt.pause(0.5)
+            plt.pause(0.1)
             aGraphic.cla()
         # else:
         #     plt.show()
