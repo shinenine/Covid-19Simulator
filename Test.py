@@ -8,6 +8,7 @@ from matplotlib.pyplot import MultipleLocator
 
 
 def main():
+    b['state'] = tk.DISABLED
     _bedQuantities = int(bedQuantities.get())
     _deadRate = float(deadRate.get())
     _numberOfPeople = int(numberOfPeople.get())
