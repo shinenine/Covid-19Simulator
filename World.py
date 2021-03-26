@@ -305,7 +305,7 @@ class World:
         aGraphic.scatter(npx3, npy3, marker="o", color="green", s=5, label="REMOVED")
         aGraphic.scatter(npx4, npy4, marker="x", color="black", s=5, label="DEAD")
         # ani = animation.FuncAnimation(aGraphic, )
-        aGraphic.legend(loc="best")
+        aGraphic.legend(loc="upper right")
         if not choose:
             plt.pause(0.1)
             aGraphic.cla()

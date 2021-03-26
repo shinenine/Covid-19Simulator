@@ -104,10 +104,6 @@ def main():
         plt.plot(start.deadHistory, marker='o', color="blue")
         plt.xlim(0, None)
         plt.ylim(0, None)
-        majorLocator = MultipleLocator(1)
-        ax = plt.gca()
-        # 把x,y轴的主刻度设置为1的倍数
-        ax.xaxis.set_major_locator(majorLocator)
         plt.ylabel("死亡者数量", fontproperties=myFont)
         plt.xlabel("天数", fontproperties=myFont)
         plt.show()
